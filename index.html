@@ -29,7 +29,38 @@
 <script>
 "use strict";
 var KEY="keluargaku_db",db=loadDB(),treeMode="vertical";
-function loadDB(){try{var raw=localStorage.getItem(KEY);if(raw){var x=JSON.parse(raw);if(x&&Array.isArray(x.members))return {members:x.members,rels:Array.isArray(x.rels)?x.rels:[],health:Array.isArray(x.health)?x.health:[]};}}catch(e){}return migrateOld()}
+function loadDB(){
+ try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){
+   var x=JSON.parse(raw);
+   if(x&&Array.isArray(x.members)){
+    var members=x.members.map(function(m){
+     var sex=m.sex||(m.gender==="Laki-laki"?"L":m.gender==="Perempuan"?"P":"U");
+     return Object.assign({},m,{
+      sex:sex,status:m.status||(m.death?"wafat":"hidup"),origin:m.origin||m.place||m.address||"",
+      branch:m.branch||"",clan:m.clan||"",household:m.household||"",village:m.village||"",
+      district:m.district||"",regency:m.regency||"",province:m.province||"",country:m.country||"Indonesia",
+      residence:m.residence||"Menetap",father:m.father||"",mother:m.mother||"",partner:m.partner||"",notes:m.notes||""
+     });
+    });
+    var rels=Array.isArray(x.rels)?x.rels:[];
+    rels.forEach(function(rel){
+     var parent=members.find(function(m){return m.id===rel.parent}),child=members.find(function(m){return m.id===rel.child});
+     if(!parent||!child||child.father===parent.id||child.mother===parent.id)return;
+     if(parent.sex==="L"&&!child.father)child.father=parent.id;
+     else if(parent.sex==="P"&&!child.mother)child.mother=parent.id;
+     else if(!child.father)child.father=parent.id;
+     else if(!child.mother)child.mother=parent.id;
+    });
+    var migrated={members:members,rels:rels,health:Array.isArray(x.health)?x.health:[]};
+    localStorage.setItem(KEY,JSON.stringify(migrated));
+    return migrated;
+   }
+  }
+ }catch(e){console.error("Gagal membaca data lama",e)}
+ return migrateOld();
+}
 function migrateOld(){var out={members:[],rels:[],health:[]};try{var old=JSON.parse(localStorage.getItem("keluargaku_v1")||"[]");if(Array.isArray(old))old.forEach(function(p){var id=p.id||uid();out.members.push({id:id,name:p.name||"",sex:p.sex||"U",status:p.status||"hidup",birth:p.birth||"",death:p.death||"",origin:p.place||"",branch:p.branch||"",clan:p.clan||"",household:p.household||"",village:p.village||"",district:p.district||"",regency:p.regency||"",province:p.province||"",country:p.country||"Indonesia",residence:p.residence||"Menetap",father:p.father||"",mother:p.mother||"",partner:p.partner||"",notes:p.notes||""});});}catch(e){}try{var prev=JSON.parse(localStorage.getItem("keluargaku_db")||"null");if(prev&&prev.members)out=prev;}catch(e){}return out}
 function uid(){return "KLG-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7)}
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
