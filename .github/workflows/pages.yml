@@ -26,7 +26,7 @@ jobs:
           const fs = require('fs');
           const vm = require('vm');
           const html = fs.readFileSync('index.html', 'utf8');
-          const match = html.match(/<script>([\s\\S]*?)<\/script>/);
+          const match = html.match(/<script>([\s\S]*?)<\/script>/);
           if (!match) throw new Error('Script aplikasi tidak ditemukan');
           new vm.Script(match[1], { filename: 'index.html inline script' });
           console.log('JavaScript syntax: OK');
