@@ -17,7 +17,7 @@ Aplikasi PWA lokal untuk mencatat anggota keluarga, hubungan ayah/ibu/pasangan, 
 ## Publikasi GitHub Pages
 Repository: https://github.com/madeadja2026-sys/KELUARGAKU
 
-Aktifkan melalui **Settings → Pages → Deploy from a branch → main → /(root)**. URL yang dituju:
+Aktifkan melalui **Settings → Pages → Build and deployment → Source → GitHub Actions**. Repository ini sudah dilengkapi workflow untuk memeriksa sintaks JavaScript dan menerbitkan halaman. URL yang dituju:
 https://madeadja2026-sys.github.io/KELUARGAKU/
 
 ## Instal Android
